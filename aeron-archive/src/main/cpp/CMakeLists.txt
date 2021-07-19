@@ -95,9 +95,11 @@ SET(HEADERS
 
 # static library
 add_library(aeron_archive_client STATIC ${SOURCE} ${HEADERS})
+add_library(aeron_archive_client_shared SHARED ${SOURCE} ${HEADERS})
 add_library(aeron_archive_client_wrapper STATIC ${SOURCE} ${HEADERS})
 
 add_dependencies(aeron_archive_client codecs)
+add_dependencies(aeron_archive_client_shared codecs)
 add_dependencies(aeron_archive_client_wrapper codecs)
 
 target_include_directories(aeron_archive_client
@@ -105,6 +107,10 @@ target_include_directories(aeron_archive_client
     PRIVATE ${ARCHIVE_CODEC_TARGET_DIR})
 
 target_include_directories(aeron_archive_client_wrapper
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+    PRIVATE ${ARCHIVE_CODEC_TARGET_DIR})
+
+target_include_directories(aeron_archive_client_shared
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
     PRIVATE ${ARCHIVE_CODEC_TARGET_DIR})
 
@@ -117,11 +123,17 @@ target_link_libraries(aeron_archive_client
     PRIVATE aeron_client
     INTERFACE ${CMAKE_THREAD_LIBS_INIT})
 
+target_link_libraries(aeron_archive_client_shared
+    PRIVATE aeron_client_shared
+    INTERFACE ${CMAKE_THREAD_LIBS_INIT})
+
 target_link_libraries(aeron_archive_client_wrapper
     PRIVATE aeron_client_wrapper aeron
     INTERFACE ${CMAKE_THREAD_LIBS_INIT})
 
 if (AERON_INSTALL_TARGETS)
-    install(TARGETS aeron_archive_client ARCHIVE DESTINATION lib)
+    install(TARGETS aeron_archive_client_shared aeron_archive_client 
+        LIBRARY DESTINATION lib 
+        ARCHIVE DESTINATION lib)
     install(DIRECTORY . DESTINATION include FILES_MATCHING PATTERN "*.h")
 endif ()
